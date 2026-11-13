@@ -4,7 +4,9 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 
 router.post('/register', async (req, res) => {
-    const { nombre, username, email, password, rol } = req.body;
+    const nombreVal = req.body.nombre || req.body.name; 
+    const { username, email, password, rol } = req.body;
+    
     try {
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
@@ -14,7 +16,7 @@ router.post('/register', async (req, res) => {
             VALUES ($1, $2, $3, $4, $5)
             RETURNING id, nombre, username, email, rol;
         `;
-        const values = [nombre, username.toLowerCase(), email, passwordHash, rol || 'cajero'];
+        const values = [nombreVal, username.toLowerCase(), email, passwordHash, rol || 'cajero'];
         const result = await pool.query(query, values);
         
         res.status(201).json({ success: true, user: result.rows[0] });
@@ -55,6 +57,15 @@ router.post('/login', async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: 'Error en el servidor' });
+    }
+});
+
+router.get('/users', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, nombre, username, email, rol FROM usuarios');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: 'Error al obtener usuarios' });
     }
 });
 
