@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>Nexo POS</title>
+    <!-- Fuentes de Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Estilos principales -->
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <!-- Incio de sesion-->
+    <div id="auth">
+        <!-- Panel Izquierdo: Presentación / Hero -->
+        <div class="hero">
+            <canvas id="net"></canvas>
+            <div class="hero-t">
+                <img class="mk" src="assets/mark.jpg" alt="Marca Nexo">
+                <h1>Cada venta,<br><span>conectada.</span></h1>
+                <p>Caja, inventario y tickets en un solo punto de venta, para tu mostrador y tu bolsillo.</p>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Formularios de Acceso -->
+        <div class="card">
+            <img class="lg" src="assets/logo.jpg" alt="Nexo POS Logo">
+            
+            <!-- Pestañas de navegación de auth -->
+            <div class="tabs" id="atabs">
+                <button class="on" data-f="login">Ingresar</button>
+                <button data-f="register">Crear cuenta</button>
+            </div>
+
+            <!-- Formulario de Inicio de Sesión -->
+            <form id="f-login" class="frm on" novalidate>
+                <label>
+                    <span>Nombre de usuario</span>
+                    <input name="username" autocomplete="username" required>
+                </label>
+                <label>
+                    <span>Contraseña</span>
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button type="button" class="lnk" data-f="recover">¿Olvidaste tu contraseña?</button>
+                <div class="msg"></div>
+                <button class="btn">Entrar</button>
+                <p class="hint">Demo: <b>admin</b> / admin1234 · <b>cajero</b> / cajero1234</p>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form id="f-register" class="frm" novalidate>
+                <label>
+                    <span>Nombre completo</span>
+                    <input name="name" autocomplete="name" required>
+                </label>
+                <label>
+                    <span>Nombre de usuario</span>
+                    <input name="username" autocomplete="username" required>
+                </label>
+                <label>
+                    <span>Correo electrónico</span>
+                    <input type="email" name="email" autocomplete="email" required>
+                </label>
+                <label>
+                    <span>Contraseña (mín. 8)</span>
+                    <input type="password" name="password" autocomplete="new-password" required>
+                </label>
+                <div class="msg"></div>
+                <button class="btn">Crear cuenta de cajero</button>
+                <p class="hint">Las cuentas admin las crea un administrador.</p>
+            </form>
+
+            <!-- Formulario de Recuperación de Contraseña -->
+            <form id="f-recover" class="frm" novalidate>
+                <p class="hint" style="margin: 0 0 14px;">Te enviaremos un enlace para restablecer tu contraseña.</p>
+                <label>
+                    <span>Correo electrónico</span>
+                    <input type="email" name="email" required>
+                </label>
+                <div class="msg"></div>
+                <button class="btn">Enviar enlace</button>
+                <button type="button" class="lnk" data-f="login">← Volver</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Aplicacion principal-->
+    <div id="app" hidden>
+        <!-- Barra Lateral de Navegación -->
+        <aside class="side">
+            <img class="smk" src="assets/mark.jpg" alt="Nexo Icono">
+            <nav id="nav">
+                <button data-v="pos" class="on"><i></i><span>Caja</span></button>
+                <button data-v="inv"><i></i><span>Inventario</span></button>
+                <button data-v="tix"><i></i><span>Tickets</span></button>
+                <button data-v="adm" data-admin><i></i><span>Admin</span></button>
+            </nav>
+            <button class="out" id="out"><span>Salir</span></button>
+        </aside>
+
+        <!-- Contenedor Principal -->
+        <div class="main">
+            <!-- Barra Superior -->
+            <header class="top">
+                <div>
+                    <h2 id="vt">Caja</h2>
+                    <small id="today"></small>
+                </div>
+                <label class="srch">
+                    <input id="q" type="search" placeholder="Buscar producto o código…" autocomplete="off">
+                </label>
+                <button class="scan" id="scanBtn" aria-label="Escanear código">
+                    <svg viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M4 12h16"/></svg>
+                    <span>Escanear</span>
+                </button>
+                <div class="who">
+                    <b id="wn"></b>
+                    <small id="wr"></small>
+                </div>
+            </header>
+
+            <!-- VISTA 1: CAJA (POS) -->
+            <section class="view on" id="v-pos">
+                <div class="pos">
+                    <div class="cat">
+                        <div class="chips" id="chips"></div>
+                        <div class="grid" id="grid"></div>
+                    </div>
+                    <!-- Panel Lateral de la Orden Actual -->
+                    <aside class="order" id="order">
+                        <div class="oh">
+                            <h3>Orden <span id="folio"></span></h3>
+                            <button class="x" id="oc">×</button>
+                        </div>
+                        <div class="seg" id="seg">
+                            <button class="on">Mostrador</button>
+                            <button>Para llevar</button>
+                        </div>
+                        <div class="lines" id="lines"></div>
+                        <div class="sum">
+                            <div><span>Subtotal</span><b id="s1"></b></div>
+                            <div><span>Descuento <input id="disc" type="number" min="0" max="100" value="0">%</span><b id="s2"></b></div>
+                            <div><span>IVA 16%</span><b id="s3"></b></div>
+                            <div class="tt"><span>Total</span><b id="s4"></b></div>
+                        </div>
+                        <button class="btn" id="pay">Cobrar</button>
+                    </aside>
+                </div>
+                <!-- Botón Escaner en dispositivos moviles -->
+                <button class="fab" id="fab">
+                    <svg viewBox="0 0 24 24"><path d="M5 8h14l-1.4 12H6.4zM9 8a3 3 0 0 1 6 0"/></svg>
+                    <b id="fc">0</b>
+                    <span id="ft"></span>
+                </button>
+            </section>
+
+            <!-- VISTA 2: INVENTARIO -->
+            <section class="view" id="v-inv">
+                <div class="panel" data-admin>
+                    <h3>Agregar producto</h3>
+                    <form id="pf" class="pf">
+                        <label><span>Nombre</span><input name="n" required></label>
+                        <label><span>Código (SKU / barras)</span><input name="code" required></label>
+                        <label>
+                            <span>Categoría</span>
+                            <select name="c">
+                                <option>Bebidas</option>
+                                <option>Alimentos</option>
+                                <option>Postres</option>
+                                <option>Otros</option>
+                            </select>
+                        </label>
+                        <label><span>Precio</span><input name="p" type="number" min="0" step="0.5" required></label>
+                        <label><span>Stock</span><input name="s" type="number" min="0" required></label>
+                        <label><span>Mínimo</span><input name="m" type="number" min="0" value="5"></label>
+                        <button class="btn">Guardar producto</button>
+                        <button type="button" class="btn ghost" id="pscan">Leer código</button>
+                    </form>
+                </div>
+                <div class="panel">
+                    <h3>Inventario</h3>
+                    <div class="tw">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Código</th>
+                                    <th>Cat.</th>
+                                    <th>Precio</th>
+                                    <th>Stock</th>
+                                    <th data-admin></th>
+                                </tr>
+                            </thead>
+                            <tbody id="invT"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA 3: TICKETS -->
+            <section class="view" id="v-tix">
+                <div class="panel">
+                    <h3>Tickets generados</h3>
+                    <div class="tw">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Folio</th>
+                                    <th>Fecha</th>
+                                    <th>Cajero</th>
+                                    <th>Pago</th>
+                                    <th>Total</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tixT"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA 4: ADMINISTRACIÓN -->
+            <section class="view" id="v-adm">
+                <div class="kpis" id="kpis"></div>
+                <div class="two">
+                    <div class="panel">
+                        <h3>Ventas por hora</h3>
+                        <div class="bars" id="bars"></div>
+                    </div>
+                    <div class="panel">
+                        <h3>Más vendidos</h3>
+                        <div id="top"></div>
+                    </div>
+                </div>
+                <div class="two">
+                    <div class="panel">
+                        <h3>Usuarios</h3>
+                        <div id="users"></div>
+                        <form id="uf" class="uf">
+                            <input name="name" placeholder="Nombre" required>
+                            <input name="username" placeholder="Usuario" required>
+                            <input name="email" type="email" placeholder="Correo" required>
+                            <select name="role">
+                                <option value="cajero">Cajero</option>
+                                <option value="admin">Admin</option>
+                            </select>
+                            <button class="btn">Crear</button>
+                        </form>
+                    </div>
+                    <div class="panel">
+                        <h3>Negocio</h3>
+                        <label class="fl"><span>Nombre del negocio</span><input id="bn"></label>
+                        <label class="fl"><span>IVA %</span><input id="iva" type="number" min="0" max="30"></label>
+                        <button class="btn" id="sv">Guardar ajustes</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ventanas flotantes y componentes modales-->
+    <div class="veil" id="veil"></div>
+
+    <!-- Modal de Cobro -->
+    <div class="modal" id="m-pay">
+        <button class="x" data-close>×</button>
+        <h3>Cobrar <b id="pt"></b></h3>
+        <div class="tabs" id="ptabs">
+            <button class="on" data-p="Efectivo">Efectivo</button>
+            <button data-p="Tarjeta">Tarjeta</button>
+            <button data-p="Transferencia">Transferencia / QR</button>
+        </div>
+        <div class="pp on" data-p="Efectivo">
+            <label class="fl"><span>Recibido</span><input id="rec" type="number" min="0" step="0.5"></label>
+            <p class="chg">Cambio <b id="chg">$0.00</b></p>
+        </div>
+        <div class="pp" data-p="Tarjeta">
+            <p class="hint">Se enviará el cobro a la terminal conectada mediante tu pasarela (Stripe, Mercado Pago, Clip…).</p>
+        </div>
+        <div class="pp" data-p="Transferencia">
+            <div class="qrb">QR de cobro<br><small>Genera aquí el QR / CLABE de tu pasarela</small></div>
+        </div>
+        <div class="msg" id="pm"></div>
+        <button class="btn" id="pgo">Confirmar pago</button>
+    </div>
+
+    <!-- Modal de Escáner -->
+    <div class="modal" id="m-scan">
+        <button class="x" data-close>×</button>
+        <h3>Escanear código</h3>
+        <div class="vid">
+            <video id="vid" playsinline muted></video>
+            <i class="sl"></i>
+        </div>
+        <p class="hint" id="sh">QR o código de barras</p>
+        <form id="mf" class="mf">
+            <input id="man" placeholder="O escribe el código">
+            <button class="btn">Agregar</button>
+        </form>
+    </div>
+
+    <!-- Modal de Ticket -->
+    <div class="modal" id="m-tix">
+        <button class="x" data-close>×</button>
+        <div class="paper" id="paper"></div>
+        <div class="acts">
+            <button class="btn" id="prt">Imprimir</button>
+            <button class="btn ghost" id="mail">Enviar por correo</button>
+        </div>
+    </div>
+
+    <!-- Notificación Toast -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Script Principal -->
+    <script src="js/script.js"></script>
+</body>
+</html>
