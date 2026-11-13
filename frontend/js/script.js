@@ -185,6 +185,7 @@ async function submitAuth(e, fn, ok) {
     b.disabled = true;
     try {
         const r = await fn(d);
+        console.log("Respuesta del servidor:", r); 
         ok(r, m, f);
     } catch (x) {
         m.textContent = x.message;
