@@ -42,7 +42,7 @@ function toast(t) {
 
 /* Conexion de Backend */
 const Nexo = {
-    MOCK: true, 
+    MOCK: false, 
     BASE:'https://nexo-pos-3ob9.onrender.com/api',
 
     async _(path, method = 'GET', body) {
