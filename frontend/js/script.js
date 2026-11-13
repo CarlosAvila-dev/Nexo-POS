@@ -42,8 +42,8 @@ function toast(t) {
 
 /* Conexion de Backend */
 const Nexo = {
-    MOCK: false, // Cambiado a false para apuntar directo a tu backend de Node.js
-    BASE: 'http://localhost:3000/api', // Cambia esta URL por la de tu backend en Render cuando subas a producción
+    MOCK: true, 
+    BASE:'https://nexo-pos-3ob9.onrender.com/api',
 
     async _(path, method = 'GET', body) {
         const t = sessionStorage.getItem('nexo_token');
