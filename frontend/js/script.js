@@ -594,6 +594,14 @@ $('#pgo').onclick = async () => {
 
 function showTicket(t) {
     const d = new Date(t.date);
+    
+    const itemsHtml = (t.items || []).map(i => `
+        <div class="r" style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+            <span>${i.q} × ${i.n}</span>
+            <span>${money(i.p * i.q)}</span>
+        </div>
+    `).join('');
+
     $('#paper').innerHTML = `
         <div class="c">
             <img src="assets/logo.jpg" alt="">
@@ -603,12 +611,10 @@ function showTicket(t) {
             Atendió: ${t.cajero}
         </div>
         <hr>
-        ${t.items.map(i => `
-            <div class="r">
-                <span>${i.q} × ${i.n}</span>
-                <span>${money(i.p * i.q)}</span>
-            </div>
-        `).join('')}
+        <!-- Productos del ticket -->
+        <div style="margin: 8px 0;">
+            ${itemsHtml}
+        </div>
         <hr>
         <div class="r"><span>Subtotal</span><span>${money(t.sub)}</span></div>
         ${t.disc ? `<div class="r"><span>Descuento</span><span>−${money(t.disc)}</span></div>` : ''}
@@ -623,6 +629,7 @@ function showTicket(t) {
         ${t.ref ? `<div class="r"><span>Ref.</span><span>${t.ref}</span></div>` : ''}
         <div class="c" style="margin-top:12px">¡Gracias por tu compra!</div>
     `;
+    
     $('#m-tix').dataset.f = t.folio;
     open('#m-tix');
 }
