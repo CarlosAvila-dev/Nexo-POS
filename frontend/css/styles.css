@@ -319,12 +319,24 @@ input:focus, select:focus {
 }
 
 #nav i {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 0;
+  background: var(--wash);
+  overflow: hidden;
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
   position: relative;
-  transition: .4s var(--ease);
+  transition: transform .4s var(--ease), box-shadow .4s var(--ease);
+}
+
+#nav i img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.65); 
 }
 
 #nav button:hover {
@@ -338,9 +350,9 @@ input:focus, select:focus {
 }
 
 #nav button.on i {
-  background: var(--b);
-  border-color: var(--b);
-  box-shadow: 0 0 0 5px rgba(31, 99, 198, .16);
+  background: transparent;
+  box-shadow: 0 0 0 3px rgba(31, 99, 198, .22);
+  transform: scale(1.06);
 }
 
 #nav button.on::after {
@@ -736,7 +748,7 @@ input:focus, select:focus {
   display: none;
 }
 
-/* panels */
+/*Panels */
 .panel {
   background: #fff;
   border: 1.5px solid var(--line);
